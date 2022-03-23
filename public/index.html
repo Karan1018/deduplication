@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <script
+      src="https://kit.fontawesome.com/f23bf89f3f.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <title><%= htmlWebpackPlugin.options.title %></title>
+
+    <script>
+      $(document).ready(function() {
+        $("#QusMsg1").click(function() {
+          swal(
+            "State of Domicile",
+            "Please Select the State to Which You belong",
+            "info"
+          );
+        });
+        $("#QusMsg2").click(function() {
+          swal(
+            "Scholarship Category",
+            "Please Select Pre Matric For Class 1-10 ; For Other Class / Course Select Post Matric / Top Class / MCM Option",
+            "info"
+          );
+        });
+        $("#QusMsg3").click(function() {
+          swal(
+            "Name of Student",
+            "Please enter your name as in your aadhaar card/bank account",
+            "info"
+          );
+        });
+        $("#QusMsg4").click(function() {
+          swal(
+            "Scheme Type",
+            "Please Select which ever scheme type you want to apply. Apply seperately for each type",
+            "info"
+          );
+        });
+        $("#QusMsg5").click(function() {
+          swal(
+            "Bank Account Number",
+            "For Pre Matric Bank account can be in the name of student/father/mother/joint. For Post Matric/MCM/Top Class Bank account should be in the name of the student",
+            "warning"
+          );
+        });
+        $("#QusMsg6").click(function() {
+          swal(
+            "Mobile Number",
+            "Mobile Number should be accessible to the student. All Status Updates will be sent only on this mobile number",
+            "info"
+          );
+        });
+      });
+    </script>
+
+    <script type="text/javascript">
+      function validatedate() {
+        var EnteredDate = document.getElementById("dateOfBirth").value;
+        EnteredDate = EnteredDate.replace("-", "/");
+        EnteredDate = EnteredDate.replace("-", "/");
+        document.getElementById("dateOfBirth").value = EnteredDate;
+        var dateformat = /^(0?[1-9]|[12][0-9]|3[01])[\/](0?[1-9]|1[012])[\/]\d{4}$/;
+        // Match the date format through regular expression
+        if (EnteredDate.match(dateformat)) {
+          var pdate = EnteredDate.split("/");
+          var dd = parseInt(pdate[0]);
+          var mm = parseInt(pdate[1]);
+          var yy = parseInt(pdate[2]);
+          // Create list of days of a month [assume there is no leap year by default]
+          var ListofDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+          if (mm == 1 || mm > 2) {
+            if (dd > ListofDays[mm - 1]) {
+              // alert("Please Invalid Day of Date of Birth");
+              swal("Alert!", "Please Invalid Day of Date of Birth");
+              document.getElementById("dateOfBirth").value = "";
+              document.getElementById("dateOfBirth").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          }
+          if (mm == 2) {
+            var lyear = false;
+            if ((!(yy % 4) && yy % 100) || !(yy % 400)) {
+              lyear = true;
+            }
+            if (lyear == false && dd >= 29) {
+              // alert("Please Invalid Year of Date of Birth");
+              swal("Alert!", "Invalid Year of Date of Birth");
+              document.getElementById("dateOfBirth").value = "";
+              document.getElementById("dateOfBirth").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+            if (lyear == true && dd > 29) {
+              // alert("Please Enter Valid Date of Birth");
+              swal("Alert!", "Please Enter Valid Date of Birth");
+              document.getElementById("dateOfBirth").value = "";
+              document.getElementById("dateOfBirth").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          }
+        } else {
+          // alert("Please Enter Valid Date of Birth");
+          swal("Alert!", "Please Enter Valid Date of Birth");
+          document.getElementById("dateOfBirth").value = "";
+          document.getElementById("dateOfBirth").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        }
+      }
+      function checkDate() {
+        var EnteredDate = document.getElementById("dateOfBirth").value; //for javascript
+        var serverdate = document.getElementById("serverdate").value;
+        var date = EnteredDate.substring(0, 2);
+        var month = EnteredDate.substring(3, 5);
+        var year = EnteredDate.substring(6, 10);
+        if (year > serverdate - 2) {
+          // alert("Please Enter Valid Date of Birth");
+          swal("Alert!", "Please Enter Valid Date of Birth");
+          document.getElementById("dateOfBirth").value = "";
+          document.getElementById("dateOfBirth").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        } else {
+          return true;
+        }
+      }
+      function isNumberKey(evt) {
+        var charCode = evt.which ? evt.which : event.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+          // alert("Please Enter Numeric Value");
+          swal("Alert!", "Please Enter Numeric Value");
+          return false;
+        }
+        return true;
+      }
+      function resetCaptcha() {
+        document.getElementById("imgCaptcha").src =
+          "captchaservlet.java?" + Math.random();
+      }
+      function validatefrm() {
+        var s0, s1, s2, s3;
+        s0 = dropdownCheck("stateDomicile", "Please Select Domicile State?");
+        if (s0 == false) {
+          return false;
+        }
+        s0 = dropdownCheck(
+          "scholarshipCategory",
+          "Please Select Scholarship Category?"
+        );
+        if (s0 == false) {
+          return false;
+        }
+        s1 = checkNull("stateDomicile|studentName|dateOfBirth");
+        s2 = handleSql(
+          "stateDomicile|studentName|dateOfBirth|gender|mobileNumber|emailAddress|ifscCode|ConfirmIfscCode|bankAcccountNO|ConfirmBankAcccountNO"
+        );
+        if (s1 === false || s2 === false) {
+          return false;
+        }
+        s1 = validatedate();
+        if (s1 === false) {
+          return false;
+        }
+        s1 = checkDate();
+        if (s1 === false) {
+          return false;
+        }
+        s0 = dropdownCheck("gender", "Please Select Gender?");
+        if (s0 == false) {
+          return false;
+        }
+        s0 = dropdownCheck("eidOpt", "Please Select Identity Proof?");
+        if (s0 == false) {
+          return false;
+        }
+        s1 = checkNull("mobileNumber");
+        var mob = document.getElementById("mobileNumber").value;
+        if (mob.length != 10) {
+          document.getElementById("mobileNumber").focus();
+          // alert("Please Enter Valid 10 Digit Mobile Number");
+          swal("Alert!", "Please Enter Valid 10 Digit Mobile Number");
+          document.getElementById("mobileNumber").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        }
+        if (mob.charAt(0) < 6) {
+          document.getElementById("mobileNumber").focus();
+          //alert("Please Enter Valid 10 Digit Mobile Number");
+          swal("Alert!", "Please Enter Valid 10 Digit Mobile Number");
+          document.getElementById("mobileNumber").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        }
+        s3 = email("emailAddress");
+        if (s1 == false || s2 == false || s3 == false) {
+          return false;
+        }
+        if (document.getElementById("eidOpt").value == 3) {
+          s1 = checkNull("bankProofDoc");
+          if (s1 == false) {
+            return false;
+          }
+        }
+        s1 = checkNull(
+          "ifscCode|bankAcccountNO|ConfirmBankAcccountNO|bankName|ConfirmIfscCode"
+        );
+        if (s1 == false) {
+          return false;
+        }
+        var bankAcccountNO = document.getElementById("bankAcccountNO").value;
+        var ConfirmBankAcccountNO = document.getElementById(
+          "ConfirmBankAcccountNO"
+        ).value;
+        var ifsc = document.getElementById("ifscCode").value;
+        var ConfirmIfscCode = document.getElementById("ConfirmIfscCode").value;
+        if (ConfirmIfscCode != ifsc) {
+          swal("Alert!", " Bank IFSC Code does not Match");
+          return false;
+        }
+        if (ifsc.length != 11) {
+          document.getElementById("ifscCode").focus();
+          swal("Alert!", "Please Enter Valid 11 Digit Bank IFSC Code");
+          //  alert("Please Enter Valid 11 Digit Bank IFSC Code");
+          document.getElementById("ifscCode").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        } else if (ifsc.charAt(4) != 0) {
+          document.getElementById("ifscCode").focus();
+          // alert("Invalid Bank IFSC Code");
+          swal("Alert!", "Invalid Bank IFSC Code");
+          document.getElementById("ifscCode").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        }
+        if (ConfirmBankAcccountNO != bankAcccountNO) {
+          swal("Alert!", " Bank Account No does not Match");
+          return false;
+        }
+        if (document.getElementById("chkCaptcha").value == "") {
+          document.getElementById("chkCaptcha").focus();
+          //  alert("Please enter captcha value");
+          swal("Alert!", "Please enter captcha value");
+          document.getElementById("chkCaptcha").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        } else if (document.getElementById("chkCaptcha").value.length != 6) {
+          document.getElementById("chkCaptcha").focus();
+          // alert("Please Enter 6 Digit Captcha Value");
+          swal("Alert!", "Please Enter 6 Digit Captcha Value");
+          document.getElementById("chkCaptcha").style.backgroundColor =
+            "rgb(250, 255, 189)";
+          return false;
+        }
+
+        //                if(!$('#iagree2').is(':checked'))
+        //                {
+        //                    document.getElementById("iagree2").focus();
+        //                    swal("Alert!", "Please read and click on check box");
+        //                    document.getElementById("iagree2").style.backgroundColor = "rgb(250, 255, 189)";
+        //                    return false;
+        //                }
+        //                if(!$('#iagree3').is(':checked'))
+        //                {
+        //                     document.getElementById("iagree3").focus();
+        //                    swal("Alert!", "Please read and click on check box");
+        //                    document.getElementById("iagree3").style.backgroundColor = "rgb(250, 255, 189)";
+        //                    return false;
+        //                }
+
+        if (document.getElementById("eidOpt").value == 1) {
+          var encrypt = new JSEncrypt();
+          encrypt.setPublicKey($("#pubkey").val());
+          var encrypted = encrypt.encrypt($("#aadharNumberN").val());
+          // alert(encrypted);
+          // alert(window.btoa(encrypted));
+          // $('#aadharNumber').val(btoa(encrypted));
+          $("#aadharNumber").val(encrypted);
+          $("#aadharNumberN").val("");
+        }
+        if (document.getElementById("eidOpt").value == 3) {
+          var dob = document.getElementById("dateOfBirth").value;
+          var d = calculateAge(dob, getcurrentDate());
+          if (d >= 18) {
+            if (!$("#iagreeconsent1").is(":checked")) {
+              document.getElementById("iagree3").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree3").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          } else {
+            if (!$("#iagreeconsent2").is(":checked")) {
+              document.getElementById("iagree3").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree3").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          }
+        }
+        if (document.getElementById("eidOpt").value == 1) {
+          var dob = document.getElementById("dateOfBirth").value;
+          var d = calculateAge(dob, getcurrentDate());
+          if (d >= 18) {
+            if (!$("#iagree1").is(":checked")) {
+              document.getElementById("iagree1").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree1").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+
+            if (!$("#iagree2").is(":checked")) {
+              document.getElementById("iagree2").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree2").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+
+            if (!$("#iagree3").is(":checked")) {
+              document.getElementById("iagree3").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree3").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          } else {
+            if (!$("#iagree4").is(":checked")) {
+              document.getElementById("iagree4").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree4").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+
+            if (!$("#iagree5").is(":checked")) {
+              document.getElementById("iagree5").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree5").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+
+            if (!$("#iagree6").is(":checked")) {
+              document.getElementById("iagree6").focus();
+              swal("Alert!", "Please read and click on check box");
+              document.getElementById("iagree6").style.backgroundColor =
+                "rgb(250, 255, 189)";
+              return false;
+            }
+          }
+        }
+      }
+      function calculateAge(birthDate, otherDate) {
+        birthDate = new Date(
+          birthDate
+            .split("/")
+            .reverse()
+            .join("-")
+        );
+        otherDate = new Date(
+          otherDate
+            .split("/")
+            .reverse()
+            .join("-")
+        );
+        var years = otherDate.getFullYear() - birthDate.getFullYear();
+        if (
+          otherDate.getMonth() < birthDate.getMonth() ||
+          (otherDate.getMonth() == birthDate.getMonth() &&
+            otherDate.getDate() < birthDate.getDate())
+        ) {
+          years--;
+        }
+        return years;
+      }
+      function getcurrentDate() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, "0");
+        var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+        var yyyy = today.getFullYear();
+        var cdate = dd + "/" + mm + "/" + yyyy;
+        return cdate;
+      }
+      function checkconsentdec() {
+        if ($("#eidOpt").val() == 1) {
+          var s1 = validatedate();
+          if (s1 === false) {
+            $("#eidOpt").val(-1);
+            return false;
+          }
+          s1 = checkDate();
+          if (s1 === false) {
+            $("#eidOpt").val(-1);
+            return false;
+          }
+          var dob = document.getElementById("dateOfBirth").value;
+          var d = calculateAge(dob, getcurrentDate());
+          if (d >= 18) {
+            $("#eidDeclaration").show();
+            $("#aadhaargt18").show();
+            $("#aadhaarlt18").hide();
+          } else {
+            $("#eidDeclaration").show();
+            $("#aadhaargt18").hide();
+            $("#aadhaarlt18").show();
+          }
+          $("#eid5").show();
+          $("#back_ac_declartion_div").hide();
+          //                            $("input[type=submit]").attr('disabled', 'disabled');
+          $("#back_ac_scancopy_div").hide();
+          $("#eiddiv").hide();
+          $("#eid_scancopy_div").hide();
+          $("#aadhaarconsent").hide();
+        } else if ($("#eidOpt").val() == 3) {
+          $("#eid5").hide();
+          $("#eidDeclaration").hide();
+          $("#back_ac_scancopy_div").show();
+          $("#back_ac_declartion_div").show();
+          //                            $("input[type=submit]").removeAttr('disabled');
+          $("#back_ac_scancopy_div").show();
+          $("#eiddiv").show();
+          $("#eid_scancopy_div").show();
+          var s1 = validatedate();
+          if (s1 === false) {
+            $("#eidOpt").val(-1);
+            return false;
+          }
+          s1 = checkDate();
+          if (s1 === false) {
+            $("#eidOpt").val(-1);
+            return false;
+          }
+          var dob = document.getElementById("dateOfBirth").value;
+          var d = calculateAge(dob, getcurrentDate());
+          if (d >= 18) {
+            $("#agreeconsent1").show();
+            $("#agreeconsent2").hide();
+            $("#aadhaarconsent").show();
+          } else if (d < 18) {
+            $("#agreeconsent1").hide();
+            $("#agreeconsent2").show();
+            $("#aadhaarconsent").show();
+          } else {
+            $("#agreeconsent1").hide();
+            $("#agreeconsent2").hide();
+          }
+        } else {
+          $("#eid5").hide();
+          $("#eidDeclaration").hide();
+          $("#back_ac_declartion_div").hide();
+          //                            $("input[type=submit]").removeAttr('disabled');
+          $("#back_ac_scancopy_div").hide();
+          $("#eiddiv").hide();
+          $("#eid_scancopy_div").hide();
+          $("#aadhaarconsent").hide();
+        }
+      }
+    </script>
+
+    <script defer src="../assets/js/jquery-3.5.1.min.js"></script>
+    <script defer src="../assets/js/alert.js"></script>
+    <script defer src="../assets/js/bootbox.min.js"></script>
+    <script defer src="../assets/js/bootstrap-datapicker.js"></script>
+    <script defer src="../assets/js/client.min.js"></script>
+    <script defer src="../assets/js/client.min.js.map.js"></script>
+    <script defer src="../assets/js/hash.js"></script>
+    <script defer src="../assets/js/jquery.dataTables.min.js"></script>
+    <script defer src="../assets/js/jsencrypt.js"></script>
+    <script defer src="../assets/js/sql.js"></script>
+  </head>
+  <body>
+    <script defer src="../assets/js/jquery-3.5.1.min.js"></script>
+    <link
+      href="../assets/css/font-awesome.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="must-revalidate" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta name="DownloadOptions" content="nosave" />
+
+    <noscript>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+      >
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
